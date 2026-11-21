@@ -1,0 +1,48 @@
+import Link from "next/link";
+
+export default function HomePage() {
+  return (
+    <main className="relative flex flex-1 flex-col">
+      <section className="relative flex flex-1 flex-col justify-end overflow-hidden px-5 pb-12 pt-16 sm:px-8 sm:pb-16 sm:pt-20">
+        <div
+          className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_at_top,_#eae5dc_0%,_transparent_55%),linear-gradient(180deg,_#f4f0ea_0%,_#ebe4d8_100%)]"
+          aria-hidden
+        />
+        <div className="relative mx-auto w-full max-w-xl space-y-8">
+          <div className="space-y-4">
+            <p className="font-display text-sm tracking-[0.14em] text-olive uppercase">
+              Kit de orientação profissional
+            </p>
+            <h1 className="font-display text-5xl leading-[1.05] text-charcoal sm:text-6xl">
+              Mapa da Clareza
+            </h1>
+            <p className="max-w-md text-lg text-charcoal/80">
+              Sete capítulos para se conhecer com calma — no seu aparelho, no seu
+              ritmo. Suas respostas ficam salvas localmente nesta fase.
+            </p>
+          </div>
+
+          <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
+            <Link
+              href="/assessment/1"
+              className="inline-flex min-h-11 items-center justify-center rounded-md bg-olive px-5 py-2.5 text-base font-medium text-primary-foreground transition-colors hover:bg-olive-soft sm:min-w-[12rem]"
+            >
+              Começar o Capítulo 1
+            </Link>
+            <Link
+              href="/assessment/2"
+              className="inline-flex min-h-11 items-center justify-center px-2 text-sm text-charcoal/70 underline-offset-4 hover:text-charcoal hover:underline"
+            >
+              Ir ao Capítulo 2 (aptidões)
+            </Link>
+          </div>
+
+          <p className="max-w-md text-sm text-charcoal/60">
+            Fase 1: protótipo sem conta. Os dados não saem deste navegador.
+            Falhas de salvamento aparecem na tela — nunca em silêncio.
+          </p>
+        </div>
+      </section>
+    </main>
+  );
+}
