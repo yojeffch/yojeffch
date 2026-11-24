@@ -16,13 +16,7 @@ import {
   getActsForChapter,
 } from "@/lib/journey/acts";
 import { getChapterMetaList, getQuestionById } from "@/lib/mocks/chapters";
-import {
-  MOTION,
-  reducedStepVariants,
-  stepTransition,
-  stepVariants,
-  storyVariants,
-} from "@/lib/motion";
+import { EASE, MOTION } from "@/lib/motion";
 import type {
   ActDefinition,
   AnswerMap,
@@ -97,9 +91,10 @@ export function ExperienceEngine({
   const [draft, setDraft] = useState<AnswerValue>(null);
   const [error, setError] = useState<string | null>(null);
   const [confirming, setConfirming] = useState(false);
-  const [resumed, setResumed] = useState(false);
   const advanceTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const headingRef = useRef<HTMLHeadingElement>(null);
+  const didResume = useRef(false);
+  const beatIndexRef = useRef(0);
 
   const beat = beats[beatIndex];
   const act = beat ? getAct(beat.actId) : undefined;
@@ -108,12 +103,14 @@ export function ExperienceEngine({
   const isStub = acts.length === 0;
 
   useEffect(() => {
-    setResumed(false);
+    didResume.current = false;
+    beatIndexRef.current = 0;
     setBeatIndex(0);
   }, [chapterId]);
 
   useEffect(() => {
-    if (resumed || !hydrated || beats.length === 0) return;
+    if (didResume.current || !hydrated || beats.length === 0) return;
+    didResume.current = true;
     let next = 0;
     if (initialBeatId) {
       const found = findBeatIndex(chapterId, initialBeatId);
@@ -125,17 +122,11 @@ export function ExperienceEngine({
       const found = findBeatIndex(chapterId, state.progress.currentBeatId);
       if (found >= 0) next = found;
     }
+    beatIndexRef.current = next;
     setBeatIndex(next);
-    setResumed(true);
-  }, [
-    resumed,
-    hydrated,
-    beats.length,
-    chapterId,
-    initialBeatId,
-    state.progress.currentBeatId,
-    state.progress.currentChapterId,
-  ]);
+    // Only resume once per chapter mount from stored progress / URL.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [hydrated, beats.length, chapterId, initialBeatId]);
 
   useEffect(() => {
     return () => {
@@ -185,11 +176,12 @@ export function ExperienceEngine({
       return;
     }
     setDirection(dir);
+    beatIndexRef.current = nextIndex;
     setBeatIndex(nextIndex);
   }
 
   function goNext() {
-    goToIndex(beatIndex + 1, 1);
+    goToIndex(beatIndexRef.current + 1, 1);
   }
 
   function goBack() {
@@ -198,7 +190,7 @@ export function ExperienceEngine({
       advanceTimer.current = null;
       setConfirming(false);
     }
-    goToIndex(beatIndex - 1, -1);
+    goToIndex(beatIndexRef.current - 1, -1);
   }
 
   function handleScaleSelect(question: Question, value: number) {
@@ -279,8 +271,6 @@ export function ExperienceEngine({
     );
   }
 
-  const variants = reduceMotion ? reducedStepVariants : stepVariants;
-  const story = reduceMotion ? reducedStepVariants : storyVariants;
   const isStory =
     beat.kind === "interstitial" ||
     beat.kind === "act_start" ||
@@ -296,6 +286,20 @@ export function ExperienceEngine({
     beat.kind === "question" ? getQuestionById(beat.questionId) : null;
   const isScale =
     question?.type === "aptitude_scale" || question?.type === "interest_scale";
+
+  const motionInitial = reduceMotion
+    ? { opacity: 0 }
+    : isStory
+      ? { opacity: 0, y: MOTION.slideStory }
+      : { opacity: 0, x: direction >= 0 ? MOTION.slideStep : -MOTION.slideStep };
+  const motionAnimate = reduceMotion
+    ? { opacity: 1 }
+    : { opacity: 1, x: 0, y: 0 };
+  const motionExit = reduceMotion
+    ? { opacity: 0 }
+    : isStory
+      ? { opacity: 0, y: -MOTION.slideStory / 2 }
+      : { opacity: 0, x: direction >= 0 ? -MOTION.slideStep : MOTION.slideStep };
 
   return (
     <div className="mx-auto flex w-full max-w-xl flex-1 flex-col gap-5 px-4 pb-28 pt-6 sm:px-6">
@@ -337,24 +341,20 @@ export function ExperienceEngine({
         )}
       </header>
 
-      <AnimatePresence mode="wait" custom={direction}>
+      <AnimatePresence mode="wait">
         <motion.div
           key={beat.id}
-          custom={direction}
-          variants={isStory ? story : variants}
-          initial="enter"
-          animate="center"
-          exit="exit"
-          transition={
-            reduceMotion
-              ? { duration: 0.01 }
-              : {
-                  duration: isStory ? MOTION.emphasis : MOTION.base,
-                  ease: isStory
-                    ? [...stepTransition.enter.ease]
-                    : [...stepTransition.enter.ease],
-                }
-          }
+          initial={motionInitial}
+          animate={motionAnimate}
+          exit={motionExit}
+          transition={{
+            duration: reduceMotion
+              ? 0.01
+              : isStory
+                ? MOTION.emphasis
+                : MOTION.base,
+            ease: [...EASE.enter],
+          }}
           className="space-y-6"
         >
           {(beat.kind === "act_start" || beat.kind === "act_end") && (
@@ -364,6 +364,7 @@ export function ExperienceEngine({
               variant="act"
               ctaLabel={beat.kind === "act_end" ? "Continuar" : "Começar"}
               onContinue={goNext}
+              onBack={goBack}
             />
           )}
 
@@ -372,6 +373,7 @@ export function ExperienceEngine({
               title={beat.title}
               body={beat.body}
               onContinue={goNext}
+              onBack={goBack}
             />
           )}
 
@@ -510,17 +512,6 @@ export function ExperienceEngine({
         )
       )}
 
-      {(beat.kind === "act_start" ||
-        beat.kind === "act_end" ||
-        beat.kind === "interstitial") && (
-        <div className="fixed inset-x-0 bottom-0 z-10 px-4 py-3 sm:px-6">
-          <div className="mx-auto max-w-xl">
-            <Button variant="ghost" onClick={goBack} className="text-charcoal/70">
-              Voltar
-            </Button>
-          </div>
-        </div>
-      )}
     </div>
   );
 }

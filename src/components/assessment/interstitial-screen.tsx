@@ -7,6 +7,7 @@ interface InterstitialScreenProps {
   body?: string;
   ctaLabel?: string;
   onContinue: () => void;
+  onBack?: () => void;
   variant?: "page" | "act";
 }
 
@@ -15,6 +16,7 @@ export function InterstitialScreen({
   body,
   ctaLabel = "Continuar",
   onContinue,
+  onBack,
   variant = "page",
 }: InterstitialScreenProps) {
   if (variant === "act") {
@@ -25,7 +27,7 @@ export function InterstitialScreen({
           className="pointer-events-none absolute -right-8 top-10 h-40 w-40 rounded-full bg-gold/30 blur-2xl"
           aria-hidden
         />
-        <div className="relative space-y-6">
+        <div className="relative z-10 space-y-6">
           <h2 className="font-display text-4xl leading-tight text-balance sm:text-5xl">
             {title}
           </h2>
@@ -34,12 +36,25 @@ export function InterstitialScreen({
               {body}
             </p>
           ) : null}
-          <Button
-            onClick={onContinue}
-            className="bg-gold text-charcoal hover:bg-gold-soft"
-          >
-            {ctaLabel}
-          </Button>
+          <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
+            <Button
+              type="button"
+              onClick={onContinue}
+              className="bg-gold text-charcoal hover:bg-gold-soft"
+            >
+              {ctaLabel}
+            </Button>
+            {onBack ? (
+              <Button
+                type="button"
+                variant="ghost"
+                onClick={onBack}
+                className="text-primary-foreground/80 hover:bg-white/10 hover:text-primary-foreground"
+              >
+                Voltar
+              </Button>
+            ) : null}
+          </div>
         </div>
       </div>
     );
@@ -48,7 +63,7 @@ export function InterstitialScreen({
   return (
     <div className="relative space-y-6 rounded-lg border border-charcoal/10 bg-surface-muted/50 px-5 py-8 sm:px-6">
       <div className="paper-grain absolute inset-0 rounded-lg opacity-[0.1]" aria-hidden />
-      <div className="relative space-y-4">
+      <div className="relative z-10 space-y-4">
         <p className="text-xs font-medium uppercase tracking-[0.14em] text-olive">
           Momento
         </p>
@@ -60,9 +75,16 @@ export function InterstitialScreen({
             {body}
           </p>
         ) : null}
-        <Button onClick={onContinue} className="mt-2">
-          {ctaLabel}
-        </Button>
+        <div className="flex flex-col gap-3 pt-2 sm:flex-row sm:items-center">
+          <Button type="button" onClick={onContinue}>
+            {ctaLabel}
+          </Button>
+          {onBack ? (
+            <Button type="button" variant="secondary" onClick={onBack}>
+              Voltar
+            </Button>
+          ) : null}
+        </div>
       </div>
     </div>
   );

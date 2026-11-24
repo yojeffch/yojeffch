@@ -20,46 +20,51 @@ interface ScaleInputProps {
 }
 
 export function ScaleInput({
-  name,
+  name: _name,
   value,
   onChange,
   disabled,
   confirming,
 }: ScaleInputProps) {
+  void _name;
   return (
-    <fieldset className="space-y-3" disabled={disabled}>
-      <legend className="sr-only">Escala de 1 a 5</legend>
+    <div
+      className="space-y-3"
+      role="radiogroup"
+      aria-label="Escala de 1 a 5"
+      aria-disabled={disabled || undefined}
+    >
       <div className="grid grid-cols-5 gap-2">
         {[1, 2, 3, 4, 5].map((n) => {
           const selected = value === n;
           return (
-            <motion.label
+            <motion.button
               key={n}
+              type="button"
+              role="radio"
+              disabled={disabled}
               whileTap={disabled ? undefined : { scale: 0.97 }}
+              aria-checked={selected}
+              aria-label={`${n} — ${LABELS[n]}`}
+              onClick={() => onChange(n)}
               className={cn(
-                "relative flex min-h-14 cursor-pointer flex-col items-center justify-center rounded-md border px-1 py-2 text-center transition-colors",
+                "relative flex min-h-14 flex-col items-center justify-center rounded-md border px-1 py-2 text-center transition-colors",
                 selected
                   ? "border-olive bg-olive text-primary-foreground shadow-[inset_0_-3px_0_0_var(--color-gold)]"
                   : "border-charcoal/15 bg-surface text-charcoal hover:border-olive/50 hover:bg-surface-muted",
                 confirming && selected && "ring-2 ring-gold/70",
               )}
             >
-              <input
-                type="radio"
-                className="sr-only"
-                name={name}
-                value={n}
-                checked={selected}
-                onChange={() => onChange(n)}
-              />
-              <span className="text-lg font-medium tabular-nums">{n}</span>
-            </motion.label>
+              <span className="pointer-events-none text-lg font-medium tabular-nums">
+                {n}
+              </span>
+            </motion.button>
           );
         })}
       </div>
       {value != null && (
         <p className="text-sm text-charcoal/70">{LABELS[value]}</p>
       )}
-    </fieldset>
+    </div>
   );
 }
