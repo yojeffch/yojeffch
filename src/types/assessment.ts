@@ -10,6 +10,7 @@ export type QuestionType =
   | "long_text"
   | "single_choice"
   | "aptitude_scale"
+  | "interest_scale"
   | "instruction";
 
 /** Cap. 2 aptitude keys — exact labels from the ebook. */
@@ -24,6 +25,15 @@ export type AptitudeKey =
   | "bodily"
   | "interpersonal"
   | "organizational";
+
+/** Cap. 2 Holland interest areas A–F. */
+export type InterestKey =
+  | "realistic"
+  | "investigative"
+  | "artistic"
+  | "social"
+  | "enterprising"
+  | "conventional";
 
 export type AptitudeBand = "strong" | "developing" | "low";
 
@@ -44,6 +54,7 @@ export interface QuestionBase {
 export interface ShortTextQuestion extends QuestionBase {
   type: "short_text";
   placeholder?: string;
+  inputMode?: "text" | "numeric" | "decimal";
 }
 
 export interface LongTextQuestion extends QuestionBase {
@@ -63,6 +74,13 @@ export interface AptitudeScaleQuestion extends QuestionBase {
   scaleMax: 5;
 }
 
+export interface InterestScaleQuestion extends QuestionBase {
+  type: "interest_scale";
+  interestKey: InterestKey;
+  scaleMin: 1;
+  scaleMax: 5;
+}
+
 export interface InstructionBlock extends QuestionBase {
   type: "instruction";
 }
@@ -72,6 +90,7 @@ export type Question =
   | LongTextQuestion
   | SingleChoiceQuestion
   | AptitudeScaleQuestion
+  | InterestScaleQuestion
   | InstructionBlock;
 
 export interface ChapterMeta {
@@ -100,12 +119,79 @@ export interface AptitudeScore {
   rank: number;
 }
 
+export interface InterestScore {
+  key: InterestKey;
+  label: string;
+  total: number;
+  rank: number;
+}
+
+export type ActId = "a1" | "a2" | "a3" | "b1" | "b2" | "c1";
+
+export type BeatKind =
+  | "act_start"
+  | "act_end"
+  | "interstitial"
+  | "cluster"
+  | "question"
+  | "peak";
+
+export interface BeatBase {
+  id: string;
+  actId: ActId;
+  chapterId: ChapterId;
+  kind: BeatKind;
+}
+
+/** Typographic interstitial — title/body only from ebook. */
+export interface InterstitialBeat extends BeatBase {
+  kind: "interstitial" | "act_start" | "act_end";
+  title: string;
+  body?: string;
+}
+
+export interface ClusterBeat extends BeatBase {
+  kind: "cluster";
+  label: string;
+  questionIds: string[];
+}
+
+export interface QuestionBeat extends BeatBase {
+  kind: "question";
+  questionId: string;
+  /** Burst label e.g. "Aptidão Verbal · 3/5" */
+  burstLabel?: string;
+  burstIndex?: number;
+  burstTotal?: number;
+}
+
+export interface PeakBeat extends BeatBase {
+  kind: "peak";
+  peak: "aptitudes" | "interests";
+  title: string;
+  body?: string;
+}
+
+export type Beat =
+  | InterstitialBeat
+  | ClusterBeat
+  | QuestionBeat
+  | PeakBeat;
+
+export interface ActDefinition {
+  id: ActId;
+  chapterId: ChapterId;
+  /** Ebook-anchored act title (section language). */
+  title: string;
+  subtitle?: string;
+  beats: Beat[];
+}
+
 export interface AssessmentProgress {
-  /** Last visited chapter */
   currentChapterId: ChapterId;
-  /** Question id within chapter */
   currentQuestionId: string | null;
-  /** Chapters the user has opened */
+  currentBeatId: string | null;
+  currentActId: ActId | null;
   visitedChapterIds: ChapterId[];
 }
 

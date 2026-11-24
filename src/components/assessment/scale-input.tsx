@@ -1,6 +1,7 @@
 "use client";
 
 import { cn } from "@/lib/utils";
+import { motion } from "motion/react";
 
 const LABELS: Record<number, string> = {
   1: "Não tem nada a ver comigo",
@@ -15,6 +16,7 @@ interface ScaleInputProps {
   value: number | null;
   onChange: (value: number) => void;
   disabled?: boolean;
+  confirming?: boolean;
 }
 
 export function ScaleInput({
@@ -22,6 +24,7 @@ export function ScaleInput({
   value,
   onChange,
   disabled,
+  confirming,
 }: ScaleInputProps) {
   return (
     <fieldset className="space-y-3" disabled={disabled}>
@@ -30,13 +33,15 @@ export function ScaleInput({
         {[1, 2, 3, 4, 5].map((n) => {
           const selected = value === n;
           return (
-            <label
+            <motion.label
               key={n}
+              whileTap={disabled ? undefined : { scale: 0.97 }}
               className={cn(
                 "relative flex min-h-14 cursor-pointer flex-col items-center justify-center rounded-md border px-1 py-2 text-center transition-colors",
                 selected
-                  ? "border-olive bg-olive text-primary-foreground"
+                  ? "border-olive bg-olive text-primary-foreground shadow-[inset_0_-3px_0_0_var(--color-gold)]"
                   : "border-charcoal/15 bg-surface text-charcoal hover:border-olive/50 hover:bg-surface-muted",
+                confirming && selected && "ring-2 ring-gold/70",
               )}
             >
               <input
@@ -48,7 +53,7 @@ export function ScaleInput({
                 onChange={() => onChange(n)}
               />
               <span className="text-lg font-medium tabular-nums">{n}</span>
-            </label>
+            </motion.label>
           );
         })}
       </div>

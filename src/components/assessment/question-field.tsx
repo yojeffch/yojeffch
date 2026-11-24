@@ -11,6 +11,8 @@ interface QuestionFieldProps {
   value: AnswerValue;
   error?: string | null;
   onChange: (value: AnswerValue) => void;
+  confirming?: boolean;
+  showHeading?: boolean;
 }
 
 export function QuestionField({
@@ -18,6 +20,8 @@ export function QuestionField({
   value,
   error,
   onChange,
+  confirming,
+  showHeading = true,
 }: QuestionFieldProps) {
   if (question.type === "instruction") {
     return (
@@ -34,17 +38,25 @@ export function QuestionField({
 
   return (
     <div className="space-y-3">
-      <div className="space-y-1.5">
-        <label
-          htmlFor={question.id}
-          className="block font-display text-xl leading-snug text-charcoal text-balance sm:text-2xl"
-        >
+      {showHeading ? (
+        <div className="space-y-1.5">
+          <label
+            htmlFor={question.id}
+            className="block font-display text-xl leading-snug text-charcoal text-balance sm:text-2xl"
+          >
+            {question.prompt}
+          </label>
+          {question.helpText &&
+          question.type !== "aptitude_scale" &&
+          question.type !== "interest_scale" ? (
+            <p className="text-sm text-charcoal/65">{question.helpText}</p>
+          ) : null}
+        </div>
+      ) : (
+        <label htmlFor={question.id} className="block text-sm font-medium text-charcoal">
           {question.prompt}
         </label>
-        {question.helpText ? (
-          <p className="text-sm text-charcoal/65">{question.helpText}</p>
-        ) : null}
-      </div>
+      )}
 
       {question.type === "short_text" && (
         <Input
@@ -52,6 +64,7 @@ export function QuestionField({
           value={typeof value === "string" ? value : ""}
           onChange={(event) => onChange(event.target.value)}
           placeholder={question.placeholder}
+          inputMode={question.inputMode}
           autoComplete="off"
         />
       )}
@@ -97,11 +110,13 @@ export function QuestionField({
         </div>
       )}
 
-      {question.type === "aptitude_scale" && (
+      {(question.type === "aptitude_scale" ||
+        question.type === "interest_scale") && (
         <ScaleInput
           name={question.id}
           value={typeof value === "number" ? value : null}
           onChange={onChange}
+          confirming={confirming}
         />
       )}
 

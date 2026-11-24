@@ -1,5 +1,6 @@
 import { z } from "zod";
 import type {
+  ActId,
   AssessmentState,
   ChapterId,
   PersistResult,
@@ -17,6 +18,15 @@ const chapterIdSchema = z.union([
   z.literal(7),
 ]);
 
+const actIdSchema = z.union([
+  z.literal("a1"),
+  z.literal("a2"),
+  z.literal("a3"),
+  z.literal("b1"),
+  z.literal("b2"),
+  z.literal("c1"),
+]);
+
 const assessmentStateSchema = z.object({
   version: z.literal(1),
   updatedAt: z.string(),
@@ -24,6 +34,8 @@ const assessmentStateSchema = z.object({
   progress: z.object({
     currentChapterId: chapterIdSchema,
     currentQuestionId: z.string().nullable(),
+    currentBeatId: z.string().nullable().optional(),
+    currentActId: actIdSchema.nullable().optional(),
     visitedChapterIds: z.array(chapterIdSchema),
   }),
 });
@@ -38,7 +50,26 @@ export function createEmptyState(
     progress: {
       currentChapterId: chapterId,
       currentQuestionId: null,
+      currentBeatId: null,
+      currentActId: null,
       visitedChapterIds: [chapterId],
+    },
+  };
+}
+
+function normalizeState(
+  raw: z.infer<typeof assessmentStateSchema>,
+): AssessmentState {
+  return {
+    version: 1,
+    updatedAt: raw.updatedAt,
+    answers: raw.answers,
+    progress: {
+      currentChapterId: raw.progress.currentChapterId,
+      currentQuestionId: raw.progress.currentQuestionId,
+      currentBeatId: raw.progress.currentBeatId ?? null,
+      currentActId: (raw.progress.currentActId as ActId | null) ?? null,
+      visitedChapterIds: raw.progress.visitedChapterIds,
     },
   };
 }
@@ -67,7 +98,7 @@ export function loadAssessmentState(): {
       };
     }
 
-    return { state: parsed.data, fromStorage: true };
+    return { state: normalizeState(parsed.data), fromStorage: true };
   } catch (error) {
     const message =
       error instanceof Error ? error.message : "Falha ao ler o armazenamento.";

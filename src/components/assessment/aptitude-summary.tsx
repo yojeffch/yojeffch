@@ -1,19 +1,20 @@
 "use client";
 
+import { aptitudeQuestionIds } from "@/lib/mocks/chapter-2";
 import {
   APTITUDE_ORDER,
   bandLabel,
   rankAptitudes,
   sumAptitude,
 } from "@/lib/scoring/aptitudes";
-import { aptitudeQuestionIds } from "@/lib/mocks/chapters";
 import type { AnswerMap } from "@/types/assessment";
 
 interface AptitudeSummaryProps {
   answers: AnswerMap;
+  body?: string;
 }
 
-export function AptitudeSummary({ answers }: AptitudeSummaryProps) {
+export function AptitudeSummary({ answers, body }: AptitudeSummaryProps) {
   const totals = Object.fromEntries(
     APTITUDE_ORDER.map((key) => [
       key,
@@ -30,10 +31,14 @@ export function AptitudeSummary({ answers }: AptitudeSummaryProps) {
         <h2 className="font-display text-2xl text-charcoal">
           Seu resultado de aptidões
         </h2>
-        <p className="text-sm text-charcoal/70">
-          Totais de 5 a 25 pontos, ranqueados do maior para o menor — conforme o
-          ebook.
-        </p>
+        {body ? (
+          <p className="text-sm text-charcoal/70">{body}</p>
+        ) : (
+          <p className="text-sm text-charcoal/70">
+            Totais de 5 a 25 pontos, ranqueados do maior para o menor — conforme o
+            ebook.
+          </p>
+        )}
       </div>
 
       <div className="space-y-2">
@@ -69,7 +74,13 @@ export function AptitudeSummary({ answers }: AptitudeSummaryProps) {
             <div className="h-2 overflow-hidden rounded-full bg-surface-muted">
               <div
                 className="h-full rounded-full bg-olive"
-                style={{ width: `${(item.total / 25) * 100}%` }}
+                style={{
+                  width: `${(item.total / 25) * 100}%`,
+                  backgroundImage:
+                    item.rank <= 3
+                      ? "linear-gradient(90deg, var(--color-olive), color-mix(in srgb, var(--color-gold) 55%, var(--color-olive)))"
+                      : undefined,
+                }}
               />
             </div>
             <p className="text-xs text-charcoal/60">{bandLabel(item.band)}</p>

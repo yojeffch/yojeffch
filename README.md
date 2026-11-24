@@ -1,13 +1,15 @@
 # Mapa da Clareza
 
-Plataforma interativa de orientação profissional (Fase 1: design system + motor de formulários com `localStorage`).
+Plataforma interativa de orientação profissional.
+
+**Fase 1R** — motor de experiência (atos / bursts / beats), paleta editorial com destaque ouro da capa, Cap. 1–2 navegáveis.
 
 ## Stack
 
 - Next.js App Router + TypeScript
-- Tailwind CSS (tokens editoriais)
+- Tailwind CSS (tokens editoriais + gold `#F9BF3D`)
 - Zod (validação do rascunho local)
-- Framer Motion (transições leves)
+- Motion (`motion/react`) — paper journey
 
 ## Como rodar localmente
 
@@ -28,12 +30,15 @@ Abra [http://localhost:3000](http://localhost:3000).
 | `npm run start` | Serve o build |
 | `npm run lint` | ESLint |
 
-## Fase 1 — o que está incluso
+## Fase 1R — o que está incluso
 
-- Design system editorial (`#F4F0EA` / `#1A1A1A` / `#3A4A3F`)
-- Tipos em `src/types/assessment.ts`
-- Mocks Cap. 1 (texto / múltipla escolha) e Cap. 2 (escala 1–5 + somatório/bandas)
-- Layout + barra de progresso + navegação entre capítulos
-- Motor passo a passo (avançar / voltar / editar) com feedback visível de save em `localStorage`
+- Design system editorial + gold highlight (capa do ebook)
+- Jornada em **atos** (A1–A3, B1–B2, C1) com cortinas tipográficas
+- Beats: clusters biodata, uma pergunta por tela, Likert com auto-avanço (~350ms)
+- Intersticiais tipográficos (só títulos/instruções do ebook)
+- Progresso aninhado (ato + burst)
+- Cap. 2: aptidões + interesses + peaks de ranking/faixas
+- `localStorage` com feedback visível de save (zero falha silenciosa)
+- Cap. 3–7 shells
 
-**Fora desta fase:** Supabase, Auth, admin, Cap. 3–7 com conteúdo completo.
+**Fora desta fase:** Supabase, Auth, admin, conteúdo completo Cap. 3–7.

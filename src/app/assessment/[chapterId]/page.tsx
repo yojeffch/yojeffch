@@ -1,12 +1,12 @@
-import { StepForm } from "@/components/assessment/step-form";
-import { getChapter, isChapterId } from "@/lib/mocks/chapters";
+import { ExperienceEngine } from "@/components/assessment/experience-engine";
+import { isChapterId } from "@/lib/mocks/chapters";
 import type { ChapterId } from "@/types/assessment";
 import { notFound } from "next/navigation";
 import { Suspense } from "react";
 
 interface AssessmentPageProps {
   params: Promise<{ chapterId: string }>;
-  searchParams: Promise<{ q?: string }>;
+  searchParams: Promise<{ beat?: string }>;
 }
 
 export function generateStaticParams() {
@@ -20,7 +20,7 @@ async function AssessmentChapterContent({
   searchParams,
 }: AssessmentPageProps) {
   const { chapterId: rawId } = await params;
-  const { q } = await searchParams;
+  const { beat } = await searchParams;
   const numericId = Number(rawId);
 
   if (!isChapterId(numericId)) {
@@ -28,12 +28,7 @@ async function AssessmentChapterContent({
   }
 
   const chapterId = numericId as ChapterId;
-  const chapter = getChapter(chapterId);
-  if (!chapter) {
-    notFound();
-  }
-
-  return <StepForm chapter={chapter} initialQuestionId={q} />;
+  return <ExperienceEngine chapterId={chapterId} initialBeatId={beat} />;
 }
 
 function AssessmentFallback() {

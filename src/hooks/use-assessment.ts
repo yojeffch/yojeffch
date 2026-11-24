@@ -6,6 +6,8 @@ import {
   saveAssessmentState,
 } from "@/lib/storage";
 import type {
+  ActId,
+  AnswerMap,
   AnswerValue,
   AssessmentState,
   ChapterId,
@@ -49,16 +51,21 @@ export function useHydrated() {
   );
 }
 
+export interface ProgressPatch {
+  chapterId: ChapterId;
+  questionId?: string | null;
+  beatId?: string | null;
+  actId?: ActId | null;
+}
+
 export interface AssessmentStore {
   state: AssessmentState;
   hydrated: boolean;
   saveStatus: SaveStatus;
   saveMessage: string | null;
   setAnswer: (questionId: string, value: AnswerValue) => PersistResult;
-  setProgress: (
-    chapterId: ChapterId,
-    questionId: string | null,
-  ) => PersistResult;
+  setAnswers: (patch: AnswerMap) => PersistResult;
+  setProgress: (patch: ProgressPatch) => PersistResult;
   persist: (next: AssessmentState) => PersistResult;
   reload: () => void;
 }
@@ -121,12 +128,44 @@ export function useAssessment(): AssessmentStore {
     [persist],
   );
 
-  const setProgress = useCallback(
-    (chapterId: ChapterId, questionId: string | null): PersistResult => {
+  const setAnswers = useCallback(
+    (patch: AnswerMap): PersistResult => {
       const current = stateRef.current;
-      const sameChapter = current.progress.currentChapterId === chapterId;
-      const sameQuestion = current.progress.currentQuestionId === questionId;
-      if (sameChapter && sameQuestion) {
+      const next: AssessmentState = {
+        ...current,
+        answers: {
+          ...current.answers,
+          ...patch,
+        },
+      };
+      return persist(next, "Respostas salvas neste aparelho.");
+    },
+    [persist],
+  );
+
+  const setProgress = useCallback(
+    (patch: ProgressPatch): PersistResult => {
+      const current = stateRef.current;
+      const nextQuestionId =
+        patch.questionId === undefined
+          ? current.progress.currentQuestionId
+          : patch.questionId;
+      const nextBeatId =
+        patch.beatId === undefined
+          ? current.progress.currentBeatId
+          : patch.beatId;
+      const nextActId =
+        patch.actId === undefined
+          ? current.progress.currentActId
+          : patch.actId;
+
+      const same =
+        current.progress.currentChapterId === patch.chapterId &&
+        current.progress.currentQuestionId === nextQuestionId &&
+        current.progress.currentBeatId === nextBeatId &&
+        current.progress.currentActId === nextActId;
+
+      if (same) {
         return {
           ok: true,
           status: "saved",
@@ -135,12 +174,14 @@ export function useAssessment(): AssessmentStore {
       }
 
       const visited = new Set(current.progress.visitedChapterIds);
-      visited.add(chapterId);
+      visited.add(patch.chapterId);
       const next: AssessmentState = {
         ...current,
         progress: {
-          currentChapterId: chapterId,
-          currentQuestionId: questionId,
+          currentChapterId: patch.chapterId,
+          currentQuestionId: nextQuestionId ?? null,
+          currentBeatId: nextBeatId ?? null,
+          currentActId: nextActId ?? null,
           visitedChapterIds: Array.from(visited).sort(
             (a, b) => a - b,
           ) as ChapterId[],
@@ -163,6 +204,7 @@ export function useAssessment(): AssessmentStore {
     saveStatus,
     saveMessage,
     setAnswer,
+    setAnswers,
     setProgress,
     persist: (next) => persist(next),
     reload,

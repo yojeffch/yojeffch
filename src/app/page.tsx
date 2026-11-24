@@ -5,7 +5,7 @@ export default function HomePage() {
     <main className="relative flex flex-1 flex-col">
       <section className="relative flex flex-1 flex-col justify-end overflow-hidden px-5 pb-12 pt-16 sm:px-8 sm:pb-16 sm:pt-20">
         <div
-          className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_at_top,_#eae5dc_0%,_transparent_55%),linear-gradient(180deg,_#f4f0ea_0%,_#ebe4d8_100%)]"
+          className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_at_top,_color-mix(in_srgb,#F9BF3D_18%,transparent)_0%,_transparent_50%),linear-gradient(180deg,_#f4f0ea_0%,_#ebe4d8_100%)]"
           aria-hidden
         />
         <div className="relative mx-auto w-full max-w-xl space-y-8">
@@ -17,8 +17,8 @@ export default function HomePage() {
               Mapa da Clareza
             </h1>
             <p className="max-w-md text-lg text-charcoal/80">
-              Sete capítulos para se conhecer com calma — no seu aparelho, no seu
-              ritmo. Suas respostas ficam salvas localmente nesta fase.
+              Partes curtas, no seu ritmo. Uma decisão por tela — com pausas
+              tipográficas entre blocos. Suas respostas ficam neste aparelho.
             </p>
           </div>
 
@@ -27,20 +27,21 @@ export default function HomePage() {
               href="/assessment/1"
               className="inline-flex min-h-11 items-center justify-center rounded-md bg-olive px-5 py-2.5 text-base font-medium text-primary-foreground transition-colors hover:bg-olive-soft sm:min-w-[12rem]"
             >
-              Começar o Capítulo 1
+              Começar · Quem é você
             </Link>
             <Link
               href="/assessment/2"
-              className="inline-flex min-h-11 items-center justify-center px-2 text-sm text-charcoal/70 underline-offset-4 hover:text-charcoal hover:underline"
+              className="inline-flex min-h-11 items-center justify-center rounded-md border border-charcoal/15 bg-surface px-4 text-sm text-charcoal/80 transition-colors hover:border-gold/60 hover:bg-surface-muted"
             >
-              Ir ao Capítulo 2 (aptidões)
+              Ir às aptidões
             </Link>
           </div>
 
-          <p className="max-w-md text-sm text-charcoal/60">
-            Fase 1: protótipo sem conta. Os dados não saem deste navegador.
-            Falhas de salvamento aparecem na tela — nunca em silêncio.
-          </p>
+          <ul className="max-w-md space-y-1.5 text-sm text-charcoal/60">
+            <li>Cap. 1 em três partes · Cap. 2 em aptidões + interesses</li>
+            <li>Pode sair e voltar — o rascunho é salvo aqui</li>
+            <li>Sem conta nesta fase</li>
+          </ul>
         </div>
       </section>
     </main>
