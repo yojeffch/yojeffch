@@ -132,7 +132,7 @@ const ACT_A1: ActDefinition = {
       chapterId: 1,
       kind: "cluster",
       label: "1 — Quem é você",
-      questionIds: ["c1-nome", "c1-chamado", "c1-idade", "c1-nascimento"],
+      questionIds: ["c1-nome", "c1-chamado", "c1-nascimento", "c1-idade"],
     },
     {
       id: "cluster-lugar",

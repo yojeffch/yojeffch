@@ -1,8 +1,15 @@
 "use client";
 
 import { ScaleInput } from "@/components/assessment/scale-input";
+import { AgeStepper } from "@/components/inputs/age-stepper";
+import { ChoiceCards } from "@/components/inputs/choice-cards";
+import { DateWheelPicker } from "@/components/inputs/date-wheel-picker";
+import { GradeScoreStepper } from "@/components/inputs/grade-score-stepper";
+import { PlacePicker } from "@/components/inputs/place-picker";
+import { SchoolYearPicker } from "@/components/inputs/school-year-picker";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
+import { ageFromIsoDate, formatDatePtBr } from "@/lib/brazil";
 import { cn } from "@/lib/utils";
 import type { AnswerValue, Question } from "@/types/assessment";
 
@@ -13,6 +20,8 @@ interface QuestionFieldProps {
   onChange: (value: AnswerValue) => void;
   confirming?: boolean;
   showHeading?: boolean;
+  /** Optional linked DOB ISO value — used to hint age from birth date. */
+  linkedDob?: string | null;
 }
 
 export function QuestionField({
@@ -22,6 +31,7 @@ export function QuestionField({
   onChange,
   confirming,
   showHeading = true,
+  linkedDob,
 }: QuestionFieldProps) {
   if (question.type === "instruction") {
     return (
@@ -35,6 +45,13 @@ export function QuestionField({
       </div>
     );
   }
+
+  const derivedAge =
+    question.type === "short_text" &&
+    question.uiHint === "age" &&
+    linkedDob
+      ? ageFromIsoDate(linkedDob)
+      : null;
 
   return (
     <div className="space-y-3">
@@ -51,6 +68,14 @@ export function QuestionField({
           question.type !== "interest_scale" ? (
             <p className="text-sm text-charcoal/65">{question.helpText}</p>
           ) : null}
+          {question.type === "short_text" &&
+          question.uiHint === "date" &&
+          typeof value === "string" &&
+          value ? (
+            <p className="text-sm text-olive">
+              {formatDatePtBr(value)}
+            </p>
+          ) : null}
         </div>
       ) : (
         <label htmlFor={question.id} className="block text-sm font-medium text-charcoal">
@@ -58,7 +83,52 @@ export function QuestionField({
         </label>
       )}
 
-      {question.type === "short_text" && (
+      {question.type === "short_text" && question.uiHint === "date" && (
+        <DateWheelPicker
+          id={question.id}
+          value={typeof value === "string" ? value : null}
+          onChange={onChange}
+        />
+      )}
+
+      {question.type === "short_text" && question.uiHint === "age" && (
+        <AgeStepper
+          id={question.id}
+          value={value}
+          onChange={onChange}
+          hint={
+            derivedAge != null
+              ? `Pela data de nascimento: ${derivedAge} anos (você pode ajustar).`
+              : null
+          }
+        />
+      )}
+
+      {question.type === "short_text" && question.uiHint === "place" && (
+        <PlacePicker
+          id={question.id}
+          value={typeof value === "string" ? value : null}
+          onChange={onChange}
+        />
+      )}
+
+      {question.type === "short_text" && question.uiHint === "school_year" && (
+        <SchoolYearPicker
+          id={question.id}
+          value={typeof value === "string" ? value : null}
+          onChange={onChange}
+        />
+      )}
+
+      {question.type === "short_text" && question.uiHint === "grade_score" && (
+        <GradeScoreStepper
+          id={question.id}
+          value={typeof value === "string" ? value : null}
+          onChange={onChange}
+        />
+      )}
+
+      {question.type === "short_text" && !question.uiHint && (
         <Input
           id={question.id}
           value={typeof value === "string" ? value : ""}
@@ -78,7 +148,17 @@ export function QuestionField({
         />
       )}
 
-      {question.type === "single_choice" && (
+      {question.type === "single_choice" &&
+        (question.uiHint === "cards" || !question.uiHint) && (
+          <ChoiceCards
+            name={question.id}
+            options={question.options}
+            value={typeof value === "string" ? value : null}
+            onChange={onChange}
+          />
+        )}
+
+      {question.type === "single_choice" && question.uiHint === "radio" && (
         <div className="grid gap-2" role="radiogroup" aria-labelledby={question.id}>
           <span id={question.id} className="sr-only">
             {question.prompt}

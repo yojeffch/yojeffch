@@ -31,6 +31,7 @@ function gradeSubject(slug: string, label: string): Question[] {
       type: "short_text",
       prompt: `Nota — ${label}`,
       inputMode: "decimal",
+      uiHint: "grade_score",
     },
     {
       id: gostoId,
@@ -39,6 +40,7 @@ function gradeSubject(slug: string, label: string): Question[] {
       type: "single_choice",
       prompt: "Gosto do assunto? (sim / mais ou menos / não)",
       options: GOSTO_OPTIONS,
+      uiHint: "cards",
     },
     {
       id: porqueId,
@@ -77,20 +79,22 @@ export const CHAPTER_1_QUESTIONS: Question[] = [
     required: true,
   },
   {
+    id: "c1-nascimento",
+    chapterId: 1,
+    section: "1 — Quem é você",
+    type: "short_text",
+    prompt: "Data de nascimento:",
+    uiHint: "date",
+  },
+  {
     id: "c1-idade",
     chapterId: 1,
     section: "1 — Quem é você",
     type: "short_text",
     prompt: "Idade:",
     inputMode: "numeric",
+    uiHint: "age",
     required: true,
-  },
-  {
-    id: "c1-nascimento",
-    chapterId: 1,
-    section: "1 — Quem é você",
-    type: "short_text",
-    prompt: "Data de nascimento:",
   },
   {
     id: "c1-cidade",
@@ -98,6 +102,7 @@ export const CHAPTER_1_QUESTIONS: Question[] = [
     section: "1 — Quem é você",
     type: "short_text",
     prompt: "Cidade e estado onde mora:",
+    uiHint: "place",
   },
   {
     id: "c1-escola",
@@ -113,6 +118,7 @@ export const CHAPTER_1_QUESTIONS: Question[] = [
     type: "short_text",
     prompt:
       "Ano/série que está cursando ou ano em que concluiu o ensino médio:",
+    uiHint: "school_year",
   },
   {
     id: "c1-estuda-trabalha",

@@ -16,6 +16,7 @@ import {
   getActsForChapter,
 } from "@/lib/journey/acts";
 import { getChapterMetaList, getQuestionById } from "@/lib/mocks/chapters";
+import { ageFromIsoDate } from "@/lib/brazil";
 import { EASE, MOTION } from "@/lib/motion";
 import type {
   ActDefinition,
@@ -395,15 +396,33 @@ export function ExperienceEngine({
               {beat.questionIds.map((id) => {
                 const q = getQuestionById(id);
                 if (!q) return null;
+                const dobValue =
+                  typeof clusterDraft["c1-nascimento"] === "string"
+                    ? clusterDraft["c1-nascimento"]
+                    : typeof state.answers["c1-nascimento"] === "string"
+                      ? state.answers["c1-nascimento"]
+                      : null;
                 return (
                   <QuestionField
                     key={id}
                     question={q}
                     value={clusterDraft[id] ?? null}
                     showHeading
+                    linkedDob={dobValue}
                     onChange={(value) => {
-                      setClusterDraft((prev) => ({ ...prev, [id]: value }));
                       setError(null);
+                      if (id === "c1-nascimento" && typeof value === "string") {
+                        const derived = ageFromIsoDate(value);
+                        const patch: AnswerMap = { [id]: value };
+                        if (derived != null) {
+                          patch["c1-idade"] = String(derived);
+                        }
+                        setClusterDraft((prev) => ({ ...prev, ...patch }));
+                        const result = setAnswers(patch);
+                        if (!result.ok) setError(result.message);
+                        return;
+                      }
+                      setClusterDraft((prev) => ({ ...prev, [id]: value }));
                       const result = setAnswer(id, value);
                       if (!result.ok) setError(result.message);
                     }}

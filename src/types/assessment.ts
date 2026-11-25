@@ -51,10 +51,21 @@ export interface QuestionBase {
   required?: boolean;
 }
 
+/** UI control hint — does not change ebook prompt text. */
+export type ShortTextUiHint =
+  | "date"
+  | "age"
+  | "place"
+  | "school_year"
+  | "grade_score";
+
+export type ChoiceUiHint = "cards" | "radio";
+
 export interface ShortTextQuestion extends QuestionBase {
   type: "short_text";
   placeholder?: string;
   inputMode?: "text" | "numeric" | "decimal";
+  uiHint?: ShortTextUiHint;
 }
 
 export interface LongTextQuestion extends QuestionBase {
@@ -65,6 +76,7 @@ export interface LongTextQuestion extends QuestionBase {
 export interface SingleChoiceQuestion extends QuestionBase {
   type: "single_choice";
   options: ChoiceOption[];
+  uiHint?: ChoiceUiHint;
 }
 
 export interface AptitudeScaleQuestion extends QuestionBase {
